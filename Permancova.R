@@ -99,3 +99,4 @@ kegg_sqrt<-sqrt(kegg_trimmed_ra[,1:5504])
 #get bray-curtis dissimilarities
 kegg_bray<-vegdist(kegg_sqrt, "bray")
 
+
