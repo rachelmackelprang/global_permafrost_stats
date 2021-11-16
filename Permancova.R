@@ -13,7 +13,7 @@ library(vegan)
 ######import and transform metadata
 ###################################
 
-meta<-read_excel("~/Dropbox/GitHub/global_permafrost_stats//metadata.xlsx")
+meta<-read_excel("~/Dropbox/GitHub/global_permafrost_stats/metadata.xlsx")
 
 #change anything of type 'chr' to a factor. Make the first column into row names
 meta<-meta %>% 
@@ -65,14 +65,12 @@ kegg_trimmed_ra<-t(kegg_trimmed_ra)
 
 #impute missing values of continuous variables (except longitude)
 imputed<-amelia(meta, m=5, idvars=c("Site", "Region1", "Type", "Origin", "Region2", "Period1", "Longitude", "Period2"))
-imputed_matrix<-as.data.frame(imputed$imputations)
+imputed_df<-as.data.frame(imputed$imputations)
 
 #normalize by subtracting the mean and dividing by the standard deviation. This also selects only one
-#of the imputations output by amelia 
-imputed_norm_matrix<-lapply(imputed_matrix[c(8,10:19)], function(x) c(scale(x)))
+#of the imputations output by amelia. Note we are excluding longitude
 
-#select only continuous variables that we want to analyze (we are excluding longitude)
-imputed_norm_cont<-imputed_matrix[c(8,10:19)]
+imputed_norm_cont<-scale(imputed_df[c(8,10:19)])
 
 ##############################
 #Correlation matrix and PCA##
