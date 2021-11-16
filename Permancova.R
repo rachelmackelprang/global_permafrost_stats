@@ -73,7 +73,7 @@ imputed_df<-as.data.frame(imputed$imputations)
 imputed_norm_cont<-scale(imputed_df[c(8,10:19)])
 
 ##############################
-#Correlation matrix and PCA##
+#Correlation matrix and PCA###
 ##############################
 
 #create a correlation matrix
