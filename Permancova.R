@@ -82,7 +82,7 @@ imputed_norm_cont_corr<-cor(imputed_norm_cont)
 #PCA of continuous metadata variables
 meta_pca<-prcomp(imputed_norm_cont_corr)
 
-#Extract Z-scores from PC1 and PC2 and use in permancova?
+#Extract Z-scores from PC1 and PC2 and use in permancova...
 
 
 
