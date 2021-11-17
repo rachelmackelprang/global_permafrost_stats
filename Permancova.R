@@ -13,7 +13,7 @@ library(vegan)
 ######import and transform metadata
 ###################################
 
-meta<-read_excel("~/Dropbox/GitHub/global_permafrost_stats/metadata.xlsx")
+meta<-read_excel("metadata.xlsx")
 
 #change anything of type 'chr' to a factor. Make the first column into row names
 meta<-meta %>% 
@@ -42,7 +42,7 @@ meta$pH<-meta$pH^(1/3)
 ################################
 
 #import KEGG data (counts)
-kegg_counts<-read_excel("~/Dropbox/GitHub/global_permafrost_stats//KEGG_allsamples_counts_newnames.xlsx")
+kegg_counts<-read_excel("KEGG_allsamples_counts_newnames.xlsx")
 kegg_counts<-kegg_counts %>% as.data.frame() %>% column_to_rownames("KEGG")
 
 #create phyloseq object to perform filtering and change to relative abundance
@@ -79,8 +79,13 @@ imputed_norm_cont<-scale(imputed_df[c(8,10:19)])
 #create a correlation matrix
 imputed_norm_cont_corr<-cor(imputed_norm_cont)
 
-#PCA of continuous metadata variables
-meta_pca<-prcomp(imputed_norm_cont_corr)
+#PCA of continuous metadata variables from normalized data
+meta_norm_pca<-prcomp(imputed_norm_cont)
+#extract PC1 and PC2 coordinates
+meta_norm_PCs<-meta_norm_pca$x
+
+#PCA of continuous metadata variables based on correlation matrix
+meta_corr_pca<-prcomp(imputed_norm_cont_corr)
 
 #Extract Z-scores from PC1 and PC2 and use in permancova...
 
