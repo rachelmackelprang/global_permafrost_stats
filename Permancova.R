@@ -9,6 +9,9 @@ library(phyloseq)
 library(vegan)
 
 
+set.seed(42)
+
+
 ###################################
 ######import and transform metadata
 ###################################
@@ -35,7 +38,7 @@ meta$CN<-log10(meta$CN+1)
 meta$OrganicC_percent<-log10(meta$OrganicC_percent+1)
 meta$`water content gwat per gsoil`<-log10(meta$`water content gwat per gsoil`+1)
 meta$electrical_cond<-log10(meta$electrical_cond+1)
-meta$pH<-meta$pH^(1/3)
+meta$pH<-meta$pH^(3)
 
 ################################
 #import and manipulate KEGG data
@@ -80,14 +83,37 @@ imputed_norm_cont<-scale(imputed_df[c(8,10:19)])
 imputed_norm_cont_corr<-cor(imputed_norm_cont)
 
 #PCA of continuous metadata variables from normalized data
-meta_norm_pca<-prcomp(imputed_norm_cont)
-#extract PC1 and PC2 coordinates
-meta_norm_PCs<-meta_norm_pca$x
+meta_norm_pca<-princomp(imputed_norm_cont, scores = TRUE)
+
+#get z-scores 
+meta_norm_zscores<-meta_norm_pca$scores
+meta_norm_zscores<-as.data.frame(meta_norm_zscores)
 
 #PCA of continuous metadata variables based on correlation matrix
-meta_corr_pca<-prcomp(imputed_norm_cont_corr)
+#meta_corr_pca<-princomp(imputed_norm_cont_corr, scores=TRUE)
 
-#Extract Z-scores from PC1 and PC2 and use in permancova...
+#get z-scores from correlation matrix PCA
+#meta_corr_zscores<-meta_corr_pca$scores
+
+
+
+
+#############################
+#data wrangling. 
+#############################
+
+#add site category and region1 to PC dataframe
+meta_norm_zscores<-cbind(meta_norm_zscores, meta$Site)
+meta_norm_zscores<-cbind(meta_norm_zscores, meta$Region1)
+
+#change column name of Site from "meta$Site" to Site
+colnames(meta_norm_zscores)[colnames(meta_norm_zscores) == "meta$Site"] <- "Site"
+colnames(meta_norm_zscores)[colnames(meta_norm_zscores) == "meta$Region1"] <- "Region1"
+
+#Find only samples that overlap between KEGG data and metadata
+kegg_meta_common_ids<-intersect(rownames(meta_norm_zscores), rownames(kegg_trimmed_ra))
+kegg_trimmed_ra_common<-kegg_trimmed_ra[kegg_meta_common_ids,]
+meta_norm_zscores_common<-meta_norm_zscores[kegg_meta_common_ids,]
 
 
 
@@ -97,9 +123,16 @@ meta_corr_pca<-prcomp(imputed_norm_cont_corr)
 
 
 #square root transform kegg relative abundance data
-kegg_sqrt<-sqrt(kegg_trimmed_ra[,1:5504])
+kegg_sqrt<-sqrt(kegg_trimmed_ra_common[,1:5504])
 
 #get bray-curtis dissimilarities
 kegg_bray<-vegdist(kegg_sqrt, "bray")
 
+
+
+#permanova
+
+kegg_PC1_PC2_adonis<-adonis(formula=kegg_bray~Site*Comp.1*Comp.2, data=meta_norm_zscores_common, permutations=10000)
+
+kegg_PC1_PC2_adonis
 
