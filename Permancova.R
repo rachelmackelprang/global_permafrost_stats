@@ -67,7 +67,7 @@ kegg_trimmed_ra<-t(kegg_trimmed_ra)
 ###############################
 
 #impute missing values of continuous variables (except longitude)
-imputed<-amelia(meta, m=5, idvars=c("Site", "Region1", "Type", "Origin", "Region2", "Period1", "Longitude", "Period2"))
+imputed<-amelia(meta, m=1, idvars=c("Site", "Region1", "Type", "Origin", "Region2", "Period1", "Longitude", "Period2"))
 imputed_df<-as.data.frame(imputed$imputations)
 
 #normalize by subtracting the mean and dividing by the standard deviation. This also selects only one
@@ -132,7 +132,8 @@ kegg_bray<-vegdist(kegg_sqrt, "bray")
 
 #permanova
 
-kegg_PC1_PC2_adonis<-adonis(formula=kegg_bray~Site*Comp.1*Comp.2, data=meta_norm_zscores_common, permutations=10000)
+#Comp.1 and Comp.2 are the z-scores from the PCA
+kegg_PC1_PC2_adonis<-adonis(formula=kegg_bray~Site*Comp.1+Site*Comp.2, data=meta_norm_zscores_common, permutations=1000)
 
 kegg_PC1_PC2_adonis
 
